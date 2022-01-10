@@ -2,6 +2,11 @@ import numpy as np
 import cv2
 import math
 
+import os
+import datetime
+
+SAVE_PATH = '/Users/sujinlee/PycharmProjects/plasma/result_img'
+
 class PlasmaModule:
     def __init__(self, fabric, nPlasma, R, r, zoom):
 
@@ -54,6 +59,7 @@ class PlasmaModule:
         cv2.imshow('circle', self.PALETTE_)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
+        cv2.imwrite(os.path.join(SAVE_PATH, str(datetime.datetime.today())) + '.jpg', self.PALETTE_)
 
     def simulation(self, rpm=None, conveyorSpeed=None):
         # self.drawPlasma()
