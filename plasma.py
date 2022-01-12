@@ -10,18 +10,29 @@ SAVE_PATH = '/Users/sujinlee/PycharmProjects/plasma/result_img'
 class PlasmaModule:
     def __init__(self, fabric, nPlasma, R, r, zoom):
 
-        self.FABRIC_ = fabric*zoom
+        # self.FABRIC_ = fabric*zoom
+        self.FABRIC_ = fabric + 1000
         self.PALETTE_ = np.zeros((self.FABRIC_, int(self.FABRIC_*math.pi), 3), np.uint8)
         self.CENTER_ORIGIN_ = [int(self.FABRIC_/2), int(self.FABRIC_/2)]
         self.CENTER_ = [int(self.FABRIC_/2), int(self.FABRIC_/2)]
 
         self.nPlasma_ = nPlasma
+        self.RAD_M_ = 0
         self.ROTATION_ = 0
+        self.CONVEYOR_SPEED_ = 0
         self.ZOOM_ = zoom
         self.R_ = int(R*self.ZOOM_)
         self.r_ = int(r*self.ZOOM_)
 
         self.WHITE_ = (255, 255, 255)
+
+        self.totalPlasma = 0
+
+    def setRadianPerMinute(self, rpm):
+        self.RAD_M_ = int(rpm*math.pi)
+
+    def setConveyorSpeedPerMinute(self, conveyorSpeed_m):
+        self.CONVEYOR_SPEED_ = int(conveyorSpeed_m*self.ZOOM_)
 
     def clearPalette(self):
         self.PALETTE_ = np.zeros((self.FABRIC_, int(self.FABRIC_ * math.pi), 3), np.uint8)
@@ -32,7 +43,7 @@ class PlasmaModule:
         self.PALETTE_ = np.zeros((self.FABRIC_, int(self.FABRIC_ * math.pi), 3), np.uint8)
 
     def drawPlasma(self, color=(255, 255, 255), thickness=-1):
-        # self.PALETTE = cv2.circle(self.PALETTE, (self.CENTER_[0], self.CENTER_[1]), self.R_, color, 0) #plasma module shape
+        # self.PALETTE_ = cv2.circle(self.PALETTE_, (self.CENTER_[0], self.CENTER_[1]), self.R_, color, 0) #plasma module shape
 
         self.ROTATION_ %= int(360 / self.nPlasma_)
 
@@ -42,39 +53,58 @@ class PlasmaModule:
 
             self.PALETTE_ = cv2.circle(self.PALETTE_, (a, b), self.r_, color, -1)
 
-    def rotatePlasma(self, speed=1, color=(255, 255, 255), thickness=-1):
-        """ 수정해야함. for ~ range(----- 이부분) """
-        for rotation in range(0, 360, speed):
-            self.ROTATION_ = rotation
-            self.drawPlasma(color, thickness)
+        self.totalPlasma += self.nPlasma_
 
-    def moveCenter(self, speed=1, color=(255, 255, 255), thickness=-1):
-        """ 수정해야함. for ~ range(----- 이부분) """
-        for move in range(0, 1000):
-            self.CENTER_[0] += speed
-            self.drawPlasma(color, thickness)
+    def rotatePlasma(self, color=(255, 255, 255), thickness=-1):
+        """ self.ROTATION_ == 0 이면 예외처리"""
+        self.ROTATION_ = (self.ROTATION_ + self.RAD_M_) % 360
+        # self.drawPlasma(color, thickness)
 
-    def generatePaletteImage(self):
+    def moveCenter(self, color=(255, 255, 255), thickness=-1):
+        """ self.CONVEYOR_SPEED_ == 0 이면 예외처리 """
+        self.CENTER_[0] += self.CONVEYOR_SPEED_
+        # self.drawPlasma(color, thickness)
+
+    def generatePaletteImage(self, save=False):
         """ show self.PALETTE """
         cv2.imshow('circle', self.PALETTE_)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
-        cv2.imwrite(os.path.join(SAVE_PATH, str(datetime.datetime.today())) + '.jpg', self.PALETTE_)
 
-    def simulation(self, rpm=None, conveyorSpeed=None):
-        # self.drawPlasma()
-        if (rpm != None):
-            self.rotatePlasma(speed=rpm)
-        if (conveyorSpeed != None):
-            self.moveCenter(speed=conveyorSpeed)
-        if (rpm == None and conveyorSpeed == None):
-            for move in range(0, 1000):
-                self.CENTER_[0] += 5
-                for rotation in range(0, 360, 10):
-                    self.ROTATION_ = rotation
-                    self.drawPlasma()
+        if (save):
+            cv2.imwrite(os.path.join(SAVE_PATH, str(datetime.datetime.today())) + '.jpg', self.PALETTE_)
+            print('[*] saved!')
 
+    def simulation(self, rpm=None, conveyorSpeed_m=None, duration_m=None):
+        self.drawPlasma()
         self.generatePaletteImage()
+
+        # if (rpm != None):
+        #     self.setRadianPerMinute(rpm)
+        #     print(self.RAD_M_)
+        #     for t in range(0, duration_m):
+        #         self.rotatePlasma()
+        #         self.drawPlasma()
+        #
+        # if (conveyorSpeed_m != None):
+        #     self.setConveyorSpeedPerMinute(conveyorSpeed_m)
+        #     print(self.CONVEYOR_SPEED_)
+        #     for t in range(0, duration_m):
+        #         self.moveCenter()
+        #         self.drawPlasma()
+
+        if (rpm != None and conveyorSpeed_m != None):
+            self.setRadianPerMinute(rpm)
+            self.setConveyorSpeedPerMinute(conveyorSpeed_m)
+
+            for t in range(0, duration_m):
+                self.rotatePlasma()
+                self.moveCenter()
+                self.drawPlasma()
+                self.generatePaletteImage(save=True)
+
+        print(self.totalPlasma)
+        # self.generatePaletteImage()
 
 
 if __name__ == "__main__":
