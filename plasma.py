@@ -5,7 +5,7 @@ import math
 import os
 import datetime
 
-SAVE_PATH = '/Users/sujinlee/PycharmProjects/plasma/result_img'
+SAVE_PATH = '/Users/sujinlee/PycharmProjects/plasma/for_vid'
 
 class PlasmaModule:
     def __init__(self, fabric, nPlasma, R, r, zoom):
@@ -73,6 +73,8 @@ class PlasmaModule:
         cv2.destroyAllWindows()
 
         if (save):
+            if (os.path.exists(SAVE_PATH) == False):
+                os.mkdir(SAVE_PATH)
             cv2.imwrite(os.path.join(SAVE_PATH, str(datetime.datetime.today())) + '.jpg', self.PALETTE_)
             print('[*] saved!')
 
@@ -108,37 +110,20 @@ class PlasmaModule:
         self.drawPlasma()
         self.generatePaletteImage()
 
-        # if (rpm != None):
-        #     self.setRadianPerMinute(rpm)
-        #     print(self.RAD_M_)
-        #     for t in range(0, duration_m):
-        #         self.rotatePlasma()
-        #         self.drawPlasma()
-        #
-        # if (conveyorSpeed_m != None):
-        #     self.setConveyorSpeedPerMinute(conveyorSpeed_m)
-        #     print(self.CONVEYOR_SPEED_)
-        #     for t in range(0, duration_m):
-        #         self.moveCenter()
-        #         self.drawPlasma()
-
         if (rpm != None and conveyorSpeed_m != None):
             self.setRadianPerMinute(rpm)
             self.setConveyorSpeedPerMinute(conveyorSpeed_m)
 
-            print(self.RAD_M_)
-            print(self.RAD_M_/1000)
-
             for t in range(0, duration_m):
 
-                split = 512
+                split = int(math.pow(2, rpm/10))
 
                 for i in range(0, split):
                     self.moveCenter(split=split)
                     self.rotatePlasma(split=split)
                     self.drawPlasma()
                     print(self.ROTATION_)
-                    self.generatePaletteImage()
+                    self.generatePaletteImage(save=True)
 
         print(self.totalPlasma)
         # self.generatePaletteImage()
