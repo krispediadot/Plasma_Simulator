@@ -17,6 +17,7 @@ class PlasmaModule:
         self.CENTER_ = [int(self.FABRIC_/2), int(self.FABRIC_/2)]
 
         self.nPlasma_ = nPlasma
+        self.RPM_ = 0
         self.RAD_M_ = 0
         self.ROTATION_ = 0
         self.CONVEYOR_SPEED_ = 0
@@ -29,6 +30,7 @@ class PlasmaModule:
         self.totalPlasma = 0
 
     def setRadianPerMinute(self, rpm):
+        self.RPM_ = rpm
         self.RAD_M_ = int(rpm*360)
         # self.RAD_M_ = int(rpm * 2 * math.pi)
 
@@ -100,7 +102,7 @@ class PlasmaModule:
 
         print(len(frame_array))
 
-        out = cv2.VideoWriter(os.path.join(SAVE_PATH, 'simulation.mp4'), cv2.VideoWriter_fourcc(*'mp4v'), 15, size)
+        out = cv2.VideoWriter(os.path.join(SAVE_PATH, f'simulation_{self.RPM_}_{self.CONVEYOR_SPEED_}.mp4'), cv2.VideoWriter_fourcc(*'mp4v'), 15, size)
 
         for i in range(len(frame_array)):
             out.write(frame_array[i])
@@ -116,14 +118,19 @@ class PlasmaModule:
 
             for t in range(0, duration_m):
 
-                split = int(math.pow(2, rpm/10))
+                # split = int(math.pow(2, rpm/10))
+                split = 1024*1024
 
                 for i in range(0, split):
                     self.moveCenter(split=split)
                     self.rotatePlasma(split=split)
                     self.drawPlasma()
                     print(self.ROTATION_)
-                    self.generatePaletteImage(save=True)
+                    if (i%100 == 0):
+                        self.generatePaletteImage(save=True)
+                    # if (i % int(split/60) == 0):
+                    #     self.generatePaletteImage(save=True)
+
 
         print(self.totalPlasma)
         # self.generatePaletteImage()
