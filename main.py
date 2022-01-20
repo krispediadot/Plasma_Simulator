@@ -1,4 +1,4 @@
-from plasma import PlasmaModule
+from core.plasma import PlasmaModule
 
 SAVE_PATH = '/Users/sujinlee/PycharmProjects/plasma/for_vid'
 
