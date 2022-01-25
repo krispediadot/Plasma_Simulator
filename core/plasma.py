@@ -5,88 +5,87 @@ import math
 import os
 import datetime
 
-SAVE_PATH = '/Users/sujinlee/PycharmProjects/plasma/for_vid'
-
 class PlasmaModule:
-    def __init__(self, fabric, nPlasma, R, r, zoom):
+    def __init__(self, fabric, nPlasma, R, r, zoom, save_path):
 
-        # self.FABRIC_ = fabric*zoom
-        self.FABRIC_ = fabric + 1000
-        self.PALETTE_ = np.zeros((self.FABRIC_, int(self.FABRIC_*math.pi), 3), np.uint8)
-        self.CENTER_ORIGIN_ = [int(self.FABRIC_/2), int(self.FABRIC_/2)]
-        self.CENTER_ = [int(self.FABRIC_/2), int(self.FABRIC_/2)]
+        self._SAVE_PATH = save_path
 
-        self.nPlasma_ = nPlasma
-        self.RPM_ = 0
-        self.RAD_M_ = 0
-        self.ROTATION_ = 0
-        self.CONVEYOR_SPEED_ = 0
-        self.ZOOM_ = zoom
-        self.R_ = int(R*self.ZOOM_)
-        self.r_ = int(r*self.ZOOM_)
+        self._FABRIC = fabric + 1000
+        self._PALETTE = np.zeros((self._FABRIC, int(self._FABRIC * math.pi), 3), np.uint8)
+        self._CENTER_ORIGIN = [int(self._FABRIC / 2), int(self._FABRIC / 2)]
+        self._CENTER = [int(self._FABRIC / 2), int(self._FABRIC / 2)]
 
-        self.WHITE_ = (255, 255, 255)
+        self._NPLASMA = nPlasma
+        self._RPM = 0
+        self._RAD_M = 0
+        self._ROTATION = 0
+        self._CONVEYOR_SPEED = 0
+        self._ZOOM = zoom
+        self._R = int(R * self._ZOOM)
+        self._r = int(r * self._ZOOM)
+
+        self._WHITE = (255, 255, 255)
 
         self.totalPlasma = 0
 
-    def setRadianPerMinute(self, rpm):
-        self.RPM_ = rpm
-        self.RAD_M_ = int(rpm*360)
+    def set_radian_per_minute(self, rpm):
+        self._RPM = rpm
+        self._RAD_M = int(rpm * 360)
         # self.RAD_M_ = int(rpm * 2 * math.pi)
 
-    def setConveyorSpeedPerMinute(self, conveyorSpeed_m):
-        self.CONVEYOR_SPEED_ = int(conveyorSpeed_m*self.ZOOM_)
+    def set_conveyor_speed_per_minute(self, conveyor_speed_m):
+        self._CONVEYOR_SPEED = int(conveyor_speed_m * self._ZOOM)
 
-    def clearPalette(self):
-        self.PALETTE_ = np.zeros((self.FABRIC_, int(self.FABRIC_ * math.pi), 3), np.uint8)
+    def clear_palette(self):
+        self._PALETTE = np.zeros((self._FABRIC, int(self._FABRIC * math.pi), 3), np.uint8)
 
-    def clearAll(self):
-        self.CENTER_ = self.CENTER_ORIGIN_
-        self.ROTATION_ = 0
-        self.PALETTE_ = np.zeros((self.FABRIC_, int(self.FABRIC_ * math.pi), 3), np.uint8)
+    def clear_all(self):
+        self._CENTER = self._CENTER_ORIGIN
+        self._ROTATION = 0
+        self._PALETTE = np.zeros((self._FABRIC, int(self._FABRIC * math.pi), 3), np.uint8)
 
-    def drawPlasma(self, color=(255, 255, 255), thickness=-1):
+    def draw_plasma(self, color=(255, 255, 255), thickness=-1):
         # self.PALETTE_ = cv2.circle(self.PALETTE_, (self.CENTER_[0], self.CENTER_[1]), self.R_, color, 0) #plasma module shape
-
         # self.ROTATION_ %= int(360 / self.nPlasma_)
 
-        for theta in range(0, 360, int(360 / self.nPlasma_)):
-            a = int(self.CENTER_[0] + self.R_ * math.cos(math.radians(theta + self.ROTATION_)))
-            b = int(self.CENTER_[1] + self.R_ * math.sin(math.radians(theta + self.ROTATION_)))
+        for theta in range(0, 360, int(360 / self._NPLASMA)):
+            a = int(self._CENTER[0] + self._R * math.cos(math.radians(theta + self._ROTATION)))
+            b = int(self._CENTER[1] + self._R * math.sin(math.radians(theta + self._ROTATION)))
 
-            self.PALETTE_ = cv2.circle(self.PALETTE_, (a, b), self.r_, color, -1)
+            self._PALETTE = cv2.circle(self._PALETTE, (a, b), self._r, color, -1)
 
-        self.totalPlasma += self.nPlasma_
+        self.totalPlasma += self._NPLASMA
 
-    def rotatePlasma(self, color=(255, 255, 255), thickness=-1, split=1000):
+    def rotate_plasma(self, color=(255, 255, 255), thickness=-1, split=1000):
         """ self.ROTATION_ == 0 이면 예외처리"""
-        self.ROTATION_ = (self.ROTATION_ + (self.RAD_M_/split)) % 360
+        self._ROTATION = (self._ROTATION + (self._RAD_M / split)) % 360
         # self.drawPlasma(color, thickness)
 
-    def moveCenter(self, color=(255, 255, 255), thickness=-1, split=1000):
+    def move_center(self, color=(255, 255, 255), thickness=-1, split=1000):
         """ self.CONVEYOR_SPEED_ == 0 이면 예외처리 """
-        self.CENTER_[0] += (self.CONVEYOR_SPEED_/split)
+        self._CENTER[0] += (self._CONVEYOR_SPEED / split)
         # self.drawPlasma(color, thickness)
 
-    def generatePaletteImage(self, save=False):
+    def generate_palette_image(self, save=False, imshow=False):
         """ show self.PALETTE """
-        cv2.imshow('circle', self.PALETTE_)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
+        if imshow == True:
+            cv2.imshow('circle', self._PALETTE)
+            cv2.waitKey(0)
+            cv2.destroyAllWindows()
 
-        if (save):
-            if (os.path.exists(SAVE_PATH) == False):
-                os.mkdir(SAVE_PATH)
-            cv2.imwrite(os.path.join(SAVE_PATH, str(datetime.datetime.today())) + '.jpg', self.PALETTE_)
+        if save == True:
+            if (os.path.exists(self._SAVE_PATH) == False):
+                os.mkdir(self._SAVE_PATH)
+            cv2.imwrite(os.path.join(self._SAVE_PATH, str(datetime.datetime.today())) + '.jpg', self._PALETTE)
             print('[*] saved!')
 
-    def generatePaletteVideo(self, imagePath):
+    def generate_palette_video(self, path):
         """ 수정해야함. """
         frame_array = []
-        for filename in os.listdir(imagePath):
+        for filename in os.listdir(path):
             if (filename.endswith('.jpg')):
                 print(filename)
-                img = cv2.imread(os.path.join(SAVE_PATH, filename))
+                img = cv2.imread(os.path.join(self._SAVE_PATH, filename))
                 scale_percent = 80
 
                 height = int(img.shape[0] * (scale_percent / 100))
@@ -102,39 +101,38 @@ class PlasmaModule:
 
         print(len(frame_array))
 
-        out = cv2.VideoWriter(os.path.join(SAVE_PATH, f'simulation_{self.RPM_}_{self.CONVEYOR_SPEED_}.mp4'), cv2.VideoWriter_fourcc(*'mp4v'), 15, size)
+        out = cv2.VideoWriter(os.path.join(self._SAVE_PATH, f'simulation_{self._RPM}_{self._CONVEYOR_SPEED}.mp4'), cv2.VideoWriter_fourcc(*'mp4v'), 15, size)
 
         for i in range(len(frame_array)):
             out.write(frame_array[i])
         out.release()
 
-    def simulation(self, rpm=None, conveyorSpeed_m=None, duration_m=None):
-        self.drawPlasma()
-        self.generatePaletteImage()
+    def simulation(self, rpm=None, conveyor_speed_m=None, duration_m=None, save=False, imshow=False):
+        self.draw_plasma()
+        self.generate_palette_image()
 
-        if (rpm != None and conveyorSpeed_m != None):
-            self.setRadianPerMinute(rpm)
-            self.setConveyorSpeedPerMinute(conveyorSpeed_m)
+        if (rpm != None and conveyor_speed_m != None):
+            self.set_radian_per_minute(rpm)
+            self.set_conveyor_speed_per_minute(conveyor_speed_m)
 
             for t in range(0, duration_m):
-
                 # split = int(math.pow(2, rpm/10))
-                split = 1024*1024
+                split = 1024
 
                 for i in range(0, split):
-                    self.moveCenter(split=split)
-                    self.rotatePlasma(split=split)
-                    self.drawPlasma()
-                    print(self.ROTATION_)
+                    self.move_center(split=split)
+                    self.rotate_plasma(split=split)
+                    self.draw_plasma()
+                    print(self._ROTATION)
                     if (i%100 == 0):
-                        self.generatePaletteImage(save=True)
+                        self.generate_palette_image(save=save, imshow=imshow)
                     # if (i % int(split/60) == 0):
                     #     self.generatePaletteImage(save=True)
 
 
         print(self.totalPlasma)
         # self.generatePaletteImage()
-        self.generatePaletteVideo(SAVE_PATH)
+        self.generate_palette_video(self._SAVE_PATH)
 
 
 if __name__ == "__main__":

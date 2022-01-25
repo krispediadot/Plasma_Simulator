@@ -12,7 +12,7 @@ zoom = 10
 
 rpm = 333 #round/min
 
-pm = PlasmaModule(fabric, nPlasma, R, r, zoom)
-pm.simulation(rpm=rpm, conveyorSpeed_m=conveyorSpeed, duration_m=100)
+pm = PlasmaModule(fabric, nPlasma, R, r, zoom, save_path=SAVE_PATH)
+pm.simulation(rpm=rpm, conveyor_speed_m=conveyorSpeed, duration_m=10, save=True, imshow=False)
 
 # pm.generatePaletteVideo(SAVE_PATH)

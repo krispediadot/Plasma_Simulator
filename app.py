@@ -7,6 +7,8 @@ from tkinter import messagebox as msgbox
 
 from PIL import ImageTk, Image
 
+from core.plasma import PlasmaModule
+
 class MainWindow():
     def __init__(self, window:tkinter.Tk, savePath:str):
         """
@@ -16,10 +18,10 @@ class MainWindow():
         self.WINDOW = window
         self.SAVE_PATH = savePath
 
-        self.setStyle()
-        self.setWindow()
+        self.set_style()
+        self.set_window()
 
-    def setStyle(self):
+    def set_style(self):
         """
         define simulator style
 
@@ -41,9 +43,11 @@ class MainWindow():
         self.START_R = 100
         self.START_C = 200
         self.PARAMETER_Y_1st = 30
+        self.PARAMETER_Y_2nd = 100
         self.STOP = False
+        self.DONE = False
 
-    def setWindow(self):
+    def set_window(self):
         """
         define window design
 
@@ -77,32 +81,38 @@ class MainWindow():
         self.conveyor_input.place(x=500, y=self.PARAMETER_Y_1st, anchor='n')
 
         # == Buttons
-        self.btnResult = Button(window, text="Result", command=self.runResult, bg=self.COLOR_FG, fg=self.COLOR_BG)
+        self.btnResult = Button(window, text="Result", command=self.run_result, bg=self.COLOR_FG, fg=self.COLOR_BG)
         self.btnResult.place(x=700, y=self.PARAMETER_Y_1st, anchor='n')
 
-        self.btnStop = Button(window, text="Stop", command=self.runStop, bg=self.COLOR_FG, fg=self.COLOR_BG)
+        self.btnStop = Button(window, text="Stop", command=self.run_stop, bg=self.COLOR_FG, fg=self.COLOR_BG)
         self.btnStop.place(x=800, y=self.PARAMETER_Y_1st, anchor='n')
 
-        self.btnClear = Button(window, text="Clear", command=self.runClear, bg=self.COLOR_FG, fg=self.COLOR_BG)
+        self.btnClear = Button(window, text="Clear", command=self.run_clear, bg=self.COLOR_FG, fg=self.COLOR_BG)
         self.btnClear.place(x=900, y=self.PARAMETER_Y_1st, anchor='n')
 
         # == Outputs
         self.canvas = Canvas(window, width=900, height=350, relief="solid", bd=2)
         # canvas.create_image(455, 5, image=image, anchor='n')
-        self.canvas.place(x=500, y=100, anchor='n')
+        self.canvas.place(x=500, y=self.PARAMETER_Y_2nd, anchor='n')
 
         self.result_images = []
         self.image_on_canvas = self.canvas.create_image(455, 5, image=None, anchor='n')
         self.image = None
 
 
-    def warnSavePath(self):
+    def warn_save_path(self):
         msgbox.showwarning("Warning", "저장 위치를 지정해주세요!")
 
-    def warnDigit(self):
+    def warn_digit(self):
         msgbox.showwarning("Warning", "숫자를 입력해주세요!")
 
-    def runResult(self):
+    def run_simulation(self, rpm, conveyor, path):
+        pm = PlasmaModule(fabric=2000, nPlasma=10, R=130, r=1.5, zoom=10, save_path=path)
+        pm.simulation(rpm=rpm, conveyor_speed_m=conveyor, duration_m=10, save=True, imshow=False)
+
+        self.DONE = True
+
+    def run_result(self):
         """
         run simulator
         """
@@ -115,29 +125,45 @@ class MainWindow():
         print(conveyor)
         self.conveyor_input.delete(0, END)
 
+        # 추후 입력 받도록 수정 필요.
+        base_path = '/Users/sujinlee/PycharmProjects/plasma'
+
         # 1.1 숫자 아니면 다시 입력
         if rpm.isdigit() == False or conveyor.isdigit() == False:
-            self.warnDigit()
+            self.warn_digit()
             return
 
-        self.showResult()
+        save_path = f'{base_path}/{rpm}_{conveyor}'
 
-    def runStop(self):
+        if os.path.exists(save_path) == False:
+            os.mkdir(save_path)
+
+            # run simulation
+            self.run_simulation(int(rpm), int(conveyor), save_path)
+        else:
+            self.DONE = True
+
+        if self.DONE == True:
+            self.show_result(save_path)
+
+    def run_stop(self):
         print('STOP')
         self.STOP = not self.STOP
 
-    def runClear(self):
+    def run_clear(self):
         print('CLEAR')
         self.image = None
         self.STOP = False
+        self.DONE = False
 
-    def showResult(self):
+    def show_result(self, path):
         """
         open result images & display the images on simulator
         """
-        for file in os.listdir(self.SAVE_PATH):
-            self.result_images.append(os.path.join(self.SAVE_PATH, file))
-            print(file)
+        for file in os.listdir(path):
+            if file.endswith('.jpg'):
+                self.result_images.append(os.path.join(path, file))
+                print(file)
 
         self.result_images.sort()
 
@@ -156,8 +182,9 @@ class MainWindow():
 
 
 if __name__ == "__main__":
-    savePath = '/Users/sujinlee/PycharmProjects/plasma/120_10000_1024_512'
+    # savePath = '/Users/sujinlee/PycharmProjects/plasma/120_10000_1024_512'
+    path = '/Users/sujinlee/PycharmProjects/plasma/for_vid'
 
     window = Tk()
-    MainWindow(window, savePath)
+    MainWindow(window, path)
     window.mainloop()
