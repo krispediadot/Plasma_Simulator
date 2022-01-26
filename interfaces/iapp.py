@@ -1,10 +1,10 @@
 from abc import *
-from interfaces.iplasma import IPlasma
+from interfaces.ipalette import IPalette
 
 class IApp(metaclass=ABCMeta):
 
     @abstractmethod
-    def set_plasma(self, plamsa):
+    def set_palette(self, palette:IPalette):
         """
         connect plasma modules interface
         """

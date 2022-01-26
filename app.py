@@ -7,21 +7,19 @@ from tkinter import messagebox as msgbox
 
 from PIL import ImageTk, Image
 
-from core.plasma import PlasmaModule
 from interfaces.iapp import IApp
+from core.palette import Palette
 
 class MainWindow(IApp):
-    def __init__(self, window:tkinter.Tk, plasma:PlasmaModule):
+    def __init__(self, window:tkinter.Tk):
         """
         :param window: tkinter.TK
         """
-
         self.set_style()
         self.set_window(window)
-        self.set_plasma(plasma)
 
-    def set_plasma(self, plasma:PlasmaModule):
-        self.plasma = plasma
+    def set_palette(self, palette):
+        self._PALETTE = palette
 
     def set_style(self):
         """
@@ -113,8 +111,8 @@ class MainWindow(IApp):
         msgbox.showwarning("Warning", "숫자를 입력해주세요!")
 
     def run_simulation(self, rpm, conveyor, path):
-        self.set_plasma(PlasmaModule(fabric=2000, nPlasma=10, R=130, r=1.5, zoom=10, save_path=path))
-        self.plasma.simulation(rpm=rpm, conveyor_speed_m=conveyor, duration_m=10, save=True, imshow=False)
+        self.set_palette(Palette(fabric=2000, path=path))
+        self._PALETTE.simulation(rpm=rpm, conveyor_speed_m=conveyor, duration_m=10, save=True, imshow=False)
 
         self.DONE = True
 
@@ -191,5 +189,5 @@ class MainWindow(IApp):
 
 if __name__ == "__main__":
     window = Tk()
-    MainWindow(window, PlasmaModule)
+    MainWindow(window)
     window.mainloop()
