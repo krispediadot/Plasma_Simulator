@@ -1,9 +1,10 @@
 import os
-import time
+import cv2
 import tkinter
 from tkinter import *
 from tkinter import font as tkFont
 from tkinter import messagebox as msgbox
+# from tkinter.filedialog import askdirectory
 
 from PIL import ImageTk, Image
 
@@ -44,7 +45,8 @@ class MainWindow(IApp):
         self.START_R = 100
         self.START_C = 200
         self.PARAMETER_Y_1st = 30
-        self.PARAMETER_Y_2nd = 100
+        self.PARAMETER_Y_2nd = 455
+        self.PARAMETER_Y_3rd = 90
         self.STOP = False
         self.DONE = False
 
@@ -63,6 +65,7 @@ class MainWindow(IApp):
             - show result images
         """
 
+        self.BASE_PATH = None
         self.WINDOW = window
 
         # == Frame
@@ -94,15 +97,24 @@ class MainWindow(IApp):
         self.btnClear = Button(window, text="Clear", command=self.run_clear, bg=self.COLOR_FG, fg=self.COLOR_BG)
         self.btnClear.place(x=900, y=self.PARAMETER_Y_1st, anchor='n')
 
+        # self.btnSave = Button(window, text="Save", command=self.run_save, bg=self.COLOR_FG, fg=self.COLOR_BG)
+        # self.btnSave.place(x=800, y=self.PARAMETER_Y_2nd, anchor='n')
+
         # == Outputs
         self.canvas = Canvas(window, width=900, height=350, relief="solid", bd=2)
         # canvas.create_image(455, 5, image=image, anchor='n')
-        self.canvas.place(x=500, y=self.PARAMETER_Y_2nd, anchor='n')
+        self.canvas.place(x=500, y=self.PARAMETER_Y_3rd, anchor='n')
 
         self.result_images = []
         self.image_on_canvas = self.canvas.create_image(455, 5, image=None, anchor='n')
         self.image = None
 
+        # == Signiture
+        path = '/Users/sujinlee/PycharmProjects/plasma/signiture_.png'
+        img = Image.open(path)
+        self.img_signiture = ImageTk.PhotoImage(img.resize((240, 42)))
+        print(self.img_signiture)
+        Label(window, image=self.img_signiture).place(x=500, y=self.PARAMETER_Y_2nd, anchor='n')
 
     def warn_save_path(self):
         msgbox.showwarning("Warning", "저장 위치를 지정해주세요!")
@@ -122,27 +134,27 @@ class MainWindow(IApp):
         """
 
         # == Inputs
-        rpm = self.rpm_input.get()
-        print(rpm)
+        self.RPM = self.rpm_input.get()
+        print(self.RPM)
         self.rpm_input.delete(0, END)
 
-        conveyor = self.conveyor_input.get()
-        print(conveyor)
+        self.CONVEYOR = self.conveyor_input.get()
+        print(self.CONVEYOR)
         self.conveyor_input.delete(0, END)
 
         # 추후 입력 받도록 수정 필요.
-        base_path = '/Users/sujinlee/PycharmProjects/plasma'
+        self.BASE_PATH = '/Users/sujinlee/PycharmProjects/plasma'
 
         # = check
-        if rpm.isdigit() == False or conveyor.isdigit() == False:
+        if self.RPM.isdigit() == False or self.CONVEYOR.isdigit() == False:
             self.warn_digit()
             return
 
-        save_path = f'{base_path}/{rpm}_{conveyor}'
+        save_path = f'{self.BASE_PATH}/{self.RPM}_{self.CONVEYOR}'
 
         if os.path.exists(save_path) == False:
             os.mkdir(save_path)
-            self.run_simulation(int(rpm), int(conveyor), save_path)
+            self.run_simulation(int(self.RPM), int(self.CONVEYOR), save_path)
         else:
             self.DONE = True
 
@@ -159,11 +171,21 @@ class MainWindow(IApp):
         self.STOP = False
         self.DONE = False
 
+    # def run_save(self):
+    #     self.BASE_PATH = askdirectory(initialdir='./',
+    #                     # filetypes=[("All Files", "*.*")],
+    #                     title='Choose a path.')
+    #     print('Path to File: \n', self.BASE_PATH)
+    #
+    #     if (os.path.exists(self.BASE_PATH) == False):
+    #         os.mkdir(self.BASE_PATH)
+    #     cv2.imwrite(os.path.join(self.BASE_PATH, str(datetime.datetime.today())) + '.jpg', self._PALETTE)
+    #     print('[*] saved!')
+
     def show_result(self, path):
         """
         open result images & display the images on simulator
         """
-
         # 병렬로 수정해야함.
         # 현재는 이미지를 모두 읽어와서 큐에서 빼내는 방식으로 구현되어 있음.
         for file in os.listdir(path):
