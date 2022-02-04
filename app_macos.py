@@ -1,17 +1,22 @@
 import os
 import cv2
+import datetime
 import tkinter
 from tkinter import *
 from tkinter import font as tkFont
 from tkinter import messagebox as msgbox
-# from tkinter.filedialog import askdirectory
+from tkinter.filedialog import askdirectory
 
 from PIL import ImageTk, Image
 
 from interfaces.iapp import IApp
 from core.palette import Palette
+from core.pipeline import Pipeline
 
 class MainWindow(IApp):
+
+    pipeline = Pipeline()
+
     def __init__(self, window:tkinter.Tk):
         """
         :param window: tkinter.TK
@@ -89,16 +94,16 @@ class MainWindow(IApp):
 
         # == Buttons
         self.btnResult = Button(window, text="Result", command=self.run_result, bg=self.COLOR_FG, fg=self.COLOR_BG)
-        self.btnResult.place(x=700, y=self.PARAMETER_Y_1st, anchor='n')
+        self.btnResult.place(x=600, y=self.PARAMETER_Y_1st, anchor='n')
 
         self.btnStop = Button(window, text="Stop", command=self.run_stop, bg=self.COLOR_FG, fg=self.COLOR_BG)
-        self.btnStop.place(x=800, y=self.PARAMETER_Y_1st, anchor='n')
+        self.btnStop.place(x=700, y=self.PARAMETER_Y_1st, anchor='n')
 
         self.btnClear = Button(window, text="Clear", command=self.run_clear, bg=self.COLOR_FG, fg=self.COLOR_BG)
-        self.btnClear.place(x=900, y=self.PARAMETER_Y_1st, anchor='n')
+        self.btnClear.place(x=800, y=self.PARAMETER_Y_1st, anchor='n')
 
-        # self.btnSave = Button(window, text="Save", command=self.run_save, bg=self.COLOR_FG, fg=self.COLOR_BG)
-        # self.btnSave.place(x=800, y=self.PARAMETER_Y_2nd, anchor='n')
+        self.btnSave = Button(window, text="Save", command=self.run_save, bg=self.COLOR_FG, fg=self.COLOR_BG)
+        self.btnSave.place(x=900, y=self.PARAMETER_Y_1st, anchor='n')
 
         # == Outputs
         self.canvas = Canvas(window, width=900, height=350, relief="solid", bd=2)
@@ -171,16 +176,17 @@ class MainWindow(IApp):
         self.STOP = False
         self.DONE = False
 
-    # def run_save(self):
-    #     self.BASE_PATH = askdirectory(initialdir='./',
-    #                     # filetypes=[("All Files", "*.*")],
-    #                     title='Choose a path.')
-    #     print('Path to File: \n', self.BASE_PATH)
-    #
-    #     if (os.path.exists(self.BASE_PATH) == False):
-    #         os.mkdir(self.BASE_PATH)
-    #     cv2.imwrite(os.path.join(self.BASE_PATH, str(datetime.datetime.today())) + '.jpg', self._PALETTE)
-    #     print('[*] saved!')
+    def run_save(self):
+        self.BASE_PATH = askdirectory(initialdir='./',
+                        filetypes=[("PNG", "*.png"),
+                                   ("JPG", "*.jpg")],
+                        title='Choose a path.')
+        print('Path to File: \n', self.BASE_PATH)
+
+        if (os.path.exists(self.BASE_PATH) == False):
+            os.mkdir(self.BASE_PATH)
+        cv2.imwrite(os.path.join(self.BASE_PATH, str(datetime.datetime.today())) + '.jpg', self._PALETTE)
+        print('[*] saved!')
 
     def show_result(self, path):
         """

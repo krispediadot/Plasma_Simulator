@@ -3,9 +3,21 @@ import math
 from interfaces.iplasma import IPlasma
 
 class PlasmaModule(IPlasma):
-    def __init__(self, fabric, nPlasma, R, r, zoom):
+
+    _NPLASMA = None
+    _RPM = None
+    _RAD_M = None
+    _ROTATION = None
+    _CONVEYOR_SPEED = None
+    _ZOOM = None
+    _R = None
+    _r = None
+    _CENTER_ORIGIN = None
+    _CENTER = None
+
+    def __init__(self, center, nPlasma, R, r, zoom):
         self.set_plasma(nPlasma, R, r, zoom)
-        self.set_center(fabric)
+        self.set_center(center)
 
     def set_plasma(self, nPlasma, R, r, zoom):
         self._NPLASMA = nPlasma
@@ -17,9 +29,9 @@ class PlasmaModule(IPlasma):
         self._R = int(R * self._ZOOM)
         self._r = int(r * self._ZOOM)
 
-    def set_center(self, fabric):
-        self._CENTER_ORIGIN = [int(fabric / 2), int(fabric / 2)]
-        self._CENTER = [int(fabric / 2), int(fabric / 2)]
+    def set_center(self, center):
+        self._CENTER_ORIGIN = center
+        self._CENTER = center
 
     def set_radian_per_minute(self, rpm):
         self._RPM = rpm
@@ -73,7 +85,9 @@ if __name__ == "__main__":
 
     rpm = 333  # round/min
 
-    pm = PlasmaModule(fabric, nPlasma, R, r, zoom)
+    center = [int(fabric / 2), int(fabric / 2)]
+
+    pm = PlasmaModule(center, nPlasma, R, r, zoom)
     pm.set_radian_per_minute(rpm)
     pm.set_conveyor_speed_per_minute(conveyorSpeed)
     print(pm.next(split=int(1024*2)))

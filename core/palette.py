@@ -6,14 +6,34 @@ import datetime
 
 from interfaces.ipalette import IPalette
 from core.plasma import PlasmaModule
+from core.pipeline import Pipeline
 
 class Palette(IPalette):
+
+    pipeline = Pipeline()
+
+    _nPlasma = None
+    _R = None
+    _r = None
+    _ZOOM = None
+    _PLASMA = None
+    _SAVE_PATH = None
+    _FABRIC = None
+    _PALETTE = None
+    _WHITE = None
+
     def __init__(self, fabric, path):
         self.set_palette(fabric, path)
+        self.set_plasma_info()
+
+    def set_plasma_info(self):
+        self._nPlasma = 10
+        self._R = 130
+        self._r = 1.5
+        self._ZOOM = 5
 
     def set_plasma(self, plasma, rpm, conveyor_speed_m):
         self._PLASMA = plasma
-        self._PLASMA.set_center(self._FABRIC)
         self._PLASMA.set_radian_per_minute(rpm)
         self._PLASMA.set_conveyor_speed_per_minute(conveyor_speed_m)
 
@@ -77,7 +97,8 @@ class Palette(IPalette):
     def simulation(self, rpm=None, conveyor_speed_m=None, duration_m=None, save=False, imshow=False):
 
         if (rpm != None and conveyor_speed_m != None):
-            self.set_plasma(PlasmaModule(fabric=2000, nPlasma=10, R=130, r=1.5, zoom=10), rpm=rpm, conveyor_speed_m=conveyor_speed_m)
+            center = [int(self._FABRIC / 2), int(self._FABRIC / 2)]
+            self.set_plasma(PlasmaModule(center=center, nPlasma=self._nPlasma, R=self._R, r=self._r, zoom=self._ZOOM), rpm=rpm, conveyor_speed_m=conveyor_speed_m)
             self.draw_plasma()
             self.generate_palette_image(imshow=imshow)
 
@@ -88,9 +109,13 @@ class Palette(IPalette):
                     self.draw_plasma(split=split)
                     if (i%100 == 0):
                         self.generate_palette_image(save=save, imshow=imshow)
+                        self.pipeline.push(self._PALETTE)
+                        # print(self.pipeline.print())
+                        print(len(self.pipeline.queue))
+
 
         # self.generatePaletteImage()
-        # self.generate_palette_video(self._SAVE_PATH)
+        # self.generate_palette_video(self._SAVE_PATH)q
 
 if __name__ == "__main__" :
     path = '/Users/sujinlee/PycharmProjects/plasma/for_vid'
