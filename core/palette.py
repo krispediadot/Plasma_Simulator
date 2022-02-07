@@ -2,7 +2,6 @@ import numpy as np
 import cv2
 import math
 import os
-import datetime
 
 from interfaces.ipalette import IPalette
 from core.plasma import PlasmaModule
@@ -62,7 +61,9 @@ class Palette(IPalette):
         if save == True:
             if (os.path.exists(self._SAVE_PATH) == False):
                 os.mkdir(self._SAVE_PATH)
-            cv2.imwrite(os.path.join(self._SAVE_PATH, str(datetime.datetime.today())) + '.jpg', self._PALETTE)
+            while (self.pipeline.save_idx < len(self.pipeline.queue)):
+                cv2.imwrite(os.path.join(self._SAVE_PATH, str(self.pipeline.save_idx)) + '.jpg', self.pipeline.queue[self.pipeline.save_idx])
+                self.pipeline.save_idx += 1
             print('[*] saved!')
 
     def generate_palette_video(self, path):
@@ -105,13 +106,15 @@ class Palette(IPalette):
             for t in range(0, duration_m):
                 split = 1024*2 # rpm에 반비례하게 값을 정해줘야할듯
 
-                for i in range(0, split):
+                for i in range(1, split):
                     self.draw_plasma(split=split)
+                    if (i%10 == 0):
+                        self.generate_palette_image(save=False, imshow=True)
+                        self.pipeline.push(self._PALETTE.copy())
                     if (i%100 == 0):
-                        self.generate_palette_image(save=save, imshow=imshow)
-                        self.pipeline.push(self._PALETTE)
+                        self.generate_palette_image(save=True, imshow=False)
+                        # self.pipeline.push(self._PALETTE)
                         # print(self.pipeline.print())
-                        print(len(self.pipeline.queue))
 
 
         # self.generatePaletteImage()
@@ -120,4 +123,4 @@ class Palette(IPalette):
 if __name__ == "__main__" :
     path = '/Users/sujinlee/PycharmProjects/plasma/for_vid'
     P = Palette(fabric=2000, path=path)
-    P.simulation(rpm=120, conveyor_speed_m=1000, duration_m=10, imshow=True)
+    P.simulation(rpm=120, conveyor_speed_m=500, duration_m=10, imshow=True)
