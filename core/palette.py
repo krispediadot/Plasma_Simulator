@@ -6,10 +6,12 @@ import os
 from interfaces.ipalette import IPalette
 from core.plasma import PlasmaModule
 from core.pipeline import Pipeline
+from core.worker import Workers
 
 class Palette(IPalette):
 
     pipeline = Pipeline()
+    worker = Workers()
 
     _nPlasma = None
     _R = None
@@ -66,35 +68,6 @@ class Palette(IPalette):
                 self.pipeline.save_idx += 1
             print('[*] saved!')
 
-    def generate_palette_video(self, path):
-        """ 수정해야함. """
-        pass
-        # frame_array = []
-        # for filename in os.listdir(path):
-        #     if (filename.endswith('.jpg')):
-        #         print(filename)
-        #         img = cv2.imread(os.path.join(self._SAVE_PATH, filename))
-        #         scale_percent = 80
-        #
-        #         height = int(img.shape[0] * (scale_percent / 100))
-        #         width = int(img.shape[1] * (scale_percent / 100))
-        #         # layers = img.shape[2] * (scale_percent / 100)
-        #
-        #         size = (width, height)
-        #
-        #         img = cv2.resize(img, size)
-        #         # height, width, layers = img.shape
-        #         # size = (width, height)
-        #         frame_array.append(img)
-        #
-        # print(len(frame_array))
-        #
-        # out = cv2.VideoWriter(os.path.join(self._SAVE_PATH, f'simulation_{self._RPM}_{self._CONVEYOR_SPEED}.mp4'), cv2.VideoWriter_fourcc(*'mp4v'), 15, size)
-        #
-        # for i in range(len(frame_array)):
-        #     out.write(frame_array[i])
-        # out.release()
-
     def simulation(self, rpm=None, conveyor_speed_m=None, duration_m=None, save=False, imshow=False):
 
         if (rpm != None and conveyor_speed_m != None):
@@ -109,10 +82,13 @@ class Palette(IPalette):
                 for i in range(1, split):
                     self.draw_plasma(split=split)
                     if (i%10 == 0):
-                        self.generate_palette_image(save=False, imshow=True)
+                        self.generate_palette_image(save=False, imshow=imshow)
+                        self.worker.cv.acquire()
                         self.pipeline.push(self._PALETTE.copy())
-                    if (i%100 == 0):
-                        self.generate_palette_image(save=True, imshow=False)
+                        self.worker.cv.notify()
+                        self.worker.cv.release()
+                    # if (i%100 == 0):
+                    #     self.generate_palette_image(save=True, imshow=False)
                         # self.pipeline.push(self._PALETTE)
                         # print(self.pipeline.print())
 

@@ -46,8 +46,9 @@ class PlasmaModule(IPlasma):
         self._ROTATION = 0
 
     def update_rotation(self, split):
+        print("simulation running")
         self._ROTATION = (self._ROTATION + (self._RAD_M / split)) % 360
-        print(self._ROTATION)
+        # print(self._ROTATION)
 
     def rotate_plasma(self):
         total_a = []
