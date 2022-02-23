@@ -3,7 +3,7 @@ import cv2
 import math
 import os
 
-from interfaces.ipalette import IPalette
+from core.interfaces.ipalette import IPalette
 from core.plasma import PlasmaModule
 from core.pipeline import Pipeline
 from core.worker import Workers

@@ -1,5 +1,5 @@
 from abc import *
-from interfaces.iplasma import IPlasma
+from core.interfaces.iplasma import IPlasma
 
 class IPalette(metaclass=ABCMeta):
     """

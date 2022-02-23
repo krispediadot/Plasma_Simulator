@@ -1,5 +1,5 @@
 from abc import *
-from interfaces.ipalette import IPalette
+from core.interfaces.ipalette import IPalette
 
 class IApp(metaclass=ABCMeta):
 

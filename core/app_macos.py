@@ -10,7 +10,7 @@ from tkinter.filedialog import askdirectory
 
 from PIL import ImageTk, Image
 
-from interfaces.iapp import IApp
+from core.interfaces.iapp import IApp
 from core.palette import Palette
 from core.pipeline import Pipeline
 from core.worker import Workers
@@ -135,7 +135,7 @@ class MainWindow(IApp):
         self.image = None
 
         # == Signiture
-        path = '/Users/sujinlee/PycharmProjects/plasma/signiture_.png'
+        path = './signiture_.png'
         img = Image.open(path)
         self.img_signiture = ImageTk.PhotoImage(img.resize((240, 42)))
         print(self.img_signiture)
@@ -175,7 +175,7 @@ class MainWindow(IApp):
         self.conveyor_input.delete(0, END)
 
         # 추후 입력 받도록 수정 필요.
-        self._BASE_PATH = '/Users/sujinlee/PycharmProjects/plasma/results'
+        self._BASE_PATH = './results'
 
         # = check
         if self._RPM.isdigit() == False or self._CONVEYOR.isdigit() == False:
